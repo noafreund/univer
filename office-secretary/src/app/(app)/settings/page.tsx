@@ -1,0 +1,22 @@
+import { listUsers } from '@/lib/data';
+import { DB_PATH } from '@/lib/db';
+import { SettingsForm } from './settings-form';
+
+export default async function SettingsPage() {
+  const users = listUsers();
+  return (
+    <div className="space-y-4">
+      <h1 className="page-title">הגדרות</h1>
+      <section className="card p-4">
+        <SettingsForm
+          morning={users.find((u) => u.shift === 'morning')?.name ?? ''}
+          afternoon={users.find((u) => u.shift === 'afternoon')?.name ?? ''}
+        />
+      </section>
+      <section className="card p-4 text-sm text-slate-600">
+        <h2 className="mb-1 font-semibold text-slate-800">איפה המידע נשמר</h2>
+        <p dir="ltr" className="text-start font-mono text-xs">{DB_PATH}</p>
+      </section>
+    </div>
+  );
+}
