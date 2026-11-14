@@ -23,6 +23,13 @@ export default async function SettingsPage() {
         <h2 className="mb-2 font-semibold">משימות יומיות קבועות</h2>
         <DailyTasksEditor tasks={listDailyTasks()} />
       </section>
+      <section className="card flex flex-wrap items-center justify-between gap-2 p-4">
+        <div>
+          <h2 className="font-semibold">ייבוא מהאקסל הישן</h2>
+          <p className="text-sm text-slate-500">קריאת קובץ האקסל של המשרד, עם בדיקה ואישור לפני שמירה.</p>
+        </div>
+        <a href="/import" className="btn">📤 ייבוא מאקסל</a>
+      </section>
       <section id="backup" className="card space-y-3 p-4">
         <h2 className="font-semibold">גיבוי וייצוא</h2>
         <p className="text-sm text-slate-600">

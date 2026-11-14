@@ -89,6 +89,12 @@ export function backupPath(name: string): string | null {
   return fs.existsSync(p) ? p : null;
 }
 
+/** A labelled safety copy before a big change (import / restore). Kept apart from the daily rotation. */
+export function safetyCopy(label: string) {
+  const { date, time } = nowParts();
+  snapshot(path.join(mainBackupDir(), `office-${date}-before-${label}-${time.replace(':', '')}.db`));
+}
+
 /** Replace the database with an uploaded backup. The current data is saved first. */
 export function restoreFrom(bytes: Uint8Array): string | null {
   if (Buffer.from(bytes.subarray(0, 15)).toString() !== 'SQLite format 3') return 'הקובץ אינו קובץ גיבוי של המערכת';
@@ -103,8 +109,7 @@ export function restoreFrom(bytes: Uint8Array): string | null {
     fs.rmSync(tmp, { force: true });
     return 'לא הצלחתי לקרוא את הקובץ';
   }
-  const { date, time } = nowParts();
-  snapshot(path.join(mainBackupDir(), `office-${date}-before-restore-${time.replace(':', '')}.db`));
+  safetyCopy('restore');
   closeDb();
   fs.copyFileSync(tmp, DB_PATH);
   fs.rmSync(tmp, { force: true });
