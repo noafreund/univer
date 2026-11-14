@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { listContacts, listOrgs } from '@/lib/data';
-import { fmtDate } from '@/lib/dates';
+import { listContacts, listOrgs } from '@/core/data';
+import { fmtDate } from '@/core/dates';
 
 export default async function ContactsPage({ searchParams }: { searchParams: Promise<{ q?: string; org?: string }> }) {
   const sp = await searchParams;

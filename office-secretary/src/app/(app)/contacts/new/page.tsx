@@ -1,5 +1,5 @@
 import { ContactForm } from '@/components/contact-form';
-import { contactOptions, listOrgs, getOrg } from '@/lib/data';
+import { contactOptions, listOrgs, getOrg } from '@/core/data';
 
 export default async function NewContactPage({ searchParams }: { searchParams: Promise<{ org?: string }> }) {
   const sp = await searchParams;

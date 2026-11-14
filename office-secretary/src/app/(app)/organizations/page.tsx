@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { mergeOrgsAction, saveOrgAction } from '@/app/actions/contacts';
-import { ORG_TYPES, type OrgType } from '@/lib/constants';
-import { listOrgs } from '@/lib/data';
+import { ORG_TYPES, type OrgType } from '@/core/constants';
+import { listOrgs } from '@/core/data';
 
 export default async function OrganizationsPage() {
   const orgs = listOrgs();

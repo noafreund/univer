@@ -2,14 +2,14 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { requireUser } from '@/lib/auth';
-import { get, run, tx } from '@/lib/db';
-import { findOrCreateOrg } from '@/lib/data';
-import { DIRECTIONS, RESULTS, type Result } from '@/lib/constants';
-import { nowParts } from '@/lib/dates';
-import { normalizePersonName } from '@/lib/normalize';
+import { requireUser } from '@/core/auth';
+import { get, run, tx } from '@/core/db';
+import { findOrCreateOrg } from '@/core/data';
+import { DIRECTIONS, RESULTS, type Result } from '@/core/constants';
+import { nowParts } from '@/core/dates';
+import { normalizePersonName } from '@/core/normalize';
 
-export type CallFormState = { ok?: boolean; error?: string; message?: string } | null;
+export type CallFormState = { ok?: boolean; error?: string; message?: string; meetingId?: number; meetingContactId?: number } | null;
 
 export async function saveCallAction(fd: FormData): Promise<CallFormState> {
   const user = await requireUser();
@@ -72,8 +72,21 @@ export async function saveCallAction(fd: FormData): Promise<CallFormState> {
   });
 
   revalidatePath('/', 'layout');
+  // A meeting was set → offer to fill the meeting details in the meeting tracker.
+  let meetingId: number | undefined;
+  if (result === 'meeting_set') {
+    meetingId = get<{ id: number }>(
+      "SELECT id FROM meeting_targets WHERE contact_id = ? AND state <> 'nothing' ORDER BY updated_at DESC LIMIT 1",
+      contactId,
+    )?.id;
+  }
   if (id) redirect(String(fd.get('returnTo') || '/calls'));
-  return { ok: true, message: `נשמר: ${label} – ${RESULTS[result as Result].label} (${time})` };
+  return {
+    ok: true,
+    message: `נשמר: ${label} – ${RESULTS[result as Result].label} (${time})`,
+    meetingId,
+    meetingContactId: result === 'meeting_set' ? (contactId ?? undefined) : undefined,
+  };
 }
 
 /** One-click "no answer" for a contact, from any list. */

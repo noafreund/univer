@@ -1,8 +1,8 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { endSession, hashPassword, isSetUp, requireUser, startSession, verifyPassword } from '@/lib/auth';
-import { get, run, setSetting, tx } from '@/lib/db';
+import { endSession, hashPassword, isSetUp, requireUser, startSession, verifyPassword } from '@/core/auth';
+import { get, run, setSetting, tx } from '@/core/db';
 
 export type FormState = { error?: string; ok?: boolean; message?: string } | null;
 

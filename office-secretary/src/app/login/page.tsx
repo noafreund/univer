@@ -1,11 +1,13 @@
 import { redirect } from 'next/navigation';
-import { currentUser, isSetUp } from '@/lib/auth';
-import { listUsers } from '@/lib/data';
+import { currentUser, isSetUp } from '@/core/auth';
+import { dataDirAvailable } from '@/core/db';
+import { listUsers } from '@/core/data';
 import { LoginForm, SetupForm } from './forms';
 
 export const dynamic = 'force-dynamic';
 
 export default async function LoginPage() {
+  if (!dataDirAvailable()) redirect('/no-drive');
   if (await currentUser()) redirect('/');
   const setUp = isSetUp();
   return (

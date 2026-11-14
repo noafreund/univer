@@ -1,5 +1,6 @@
-import { listUsers } from '@/lib/data';
-import { DB_PATH } from '@/lib/db';
+import { listDailyTasks, listUsers } from '@/core/data';
+import { DailyTasksEditor } from './tasks';
+import { DB_PATH } from '@/core/db';
 import { SettingsForm } from './settings-form';
 
 export default async function SettingsPage() {
@@ -12,6 +13,10 @@ export default async function SettingsPage() {
           morning={users.find((u) => u.shift === 'morning')?.name ?? ''}
           afternoon={users.find((u) => u.shift === 'afternoon')?.name ?? ''}
         />
+      </section>
+      <section id="tasks" className="card p-4">
+        <h2 className="mb-2 font-semibold">משימות יומיות קבועות</h2>
+        <DailyTasksEditor tasks={listDailyTasks()} />
       </section>
       <section className="card p-4 text-sm text-slate-600">
         <h2 className="mb-1 font-semibold text-slate-800">איפה המידע נשמר</h2>

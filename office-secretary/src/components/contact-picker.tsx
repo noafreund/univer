@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { ContactOption } from '@/lib/data';
-import { normalizeText } from '@/lib/normalize';
+import type { ContactOption } from '@/core/data';
+import { normalizeText } from '@/core/normalize';
 
 type Props = {
   contacts: ContactOption[];

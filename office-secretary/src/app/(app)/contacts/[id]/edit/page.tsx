@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { ContactForm } from '@/components/contact-form';
-import { contactOptions, getContact, listOrgs } from '@/lib/data';
+import { contactOptions, getContact, listOrgs } from '@/core/data';
 
 export default async function EditContactPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

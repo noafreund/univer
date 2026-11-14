@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation';
 import { deleteOrgAction, mergeOrgsAction, saveOrgAction } from '@/app/actions/contacts';
 import { CallsTable } from '@/components/calls-table';
 import { ConfirmButton } from '@/components/confirm-button';
-import { ORG_TYPES } from '@/lib/constants';
-import { getOrg, listCalls, listContacts, listOrgs } from '@/lib/data';
+import { ORG_TYPES } from '@/core/constants';
+import { getOrg, listCalls, listContacts, listOrgs } from '@/core/data';
 
 export default async function OrgPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

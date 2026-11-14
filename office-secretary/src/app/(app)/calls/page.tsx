@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { CallForm } from '@/components/call-form';
 import { CallsTable } from '@/components/calls-table';
-import { RESULTS } from '@/lib/constants';
-import { contactOptions, listCalls, listOrgs } from '@/lib/data';
+import { RESULTS } from '@/core/constants';
+import { contactOptions, listCalls, listOrgs } from '@/core/data';
 
 type SP = Record<string, string | undefined>;
 

@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { saveCallAction, type CallFormState } from '@/app/actions/calls';
-import { DIRECTIONS, OPEN_BY_DEFAULT, RESULTS, ROLE_SUGGESTIONS, type Result } from '@/lib/constants';
-import { nowParts } from '@/lib/dates';
-import type { CallRow, ContactOption } from '@/lib/data';
+import { DIRECTIONS, OPEN_BY_DEFAULT, RESULTS, ROLE_SUGGESTIONS, type Result } from '@/core/constants';
+import { nowParts } from '@/core/dates';
+import type { CallRow, ContactOption } from '@/core/data';
 import { ContactPicker } from './contact-picker';
 
 type Props = {
@@ -204,7 +204,19 @@ export function CallForm({ contacts, orgNames, call, fixedContactId, returnTo }:
       </div>
 
       {state?.error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{state.error}</p>}
-      {state?.ok && <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">✓ {state.message}</p>}
+      {state?.ok && (
+        <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          ✓ {state.message}
+          {state.meetingContactId && (
+            <a
+              href={state.meetingId ? `/meetings/${state.meetingId}?state=meeting_set` : `/meetings/new?contact=${state.meetingContactId}`}
+              className="ms-2 font-semibold underline"
+            >
+              למילוי תאריך, שעה ומקום הפגישה ←
+            </a>
+          )}
+        </p>
+      )}
 
       <datalist id="org-suggestions">
         {orgNames.map((o) => <option key={o} value={o} />)}

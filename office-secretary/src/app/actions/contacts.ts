@@ -2,11 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { requireUser } from '@/lib/auth';
-import { run, tx } from '@/lib/db';
-import { findDuplicateContacts, findOrCreateOrg, type DuplicateHit } from '@/lib/data';
-import { ORG_TYPES, type OrgType } from '@/lib/constants';
-import { normalizeOrgName, normalizePersonName, phoneDigits } from '@/lib/normalize';
+import { requireUser } from '@/core/auth';
+import { run, tx } from '@/core/db';
+import { findDuplicateContacts, findOrCreateOrg, type DuplicateHit } from '@/core/data';
+import { ORG_TYPES, type OrgType } from '@/core/constants';
+import { normalizeOrgName, normalizePersonName, phoneDigits } from '@/core/normalize';
 
 export type ContactFormState = { error?: string; duplicates?: DuplicateHit[] } | null;
 

@@ -5,15 +5,18 @@ import { quickNoAnswerAction } from '@/app/actions/calls';
 import { CallForm } from '@/components/call-form';
 import { CallsTable } from '@/components/calls-table';
 import { ConfirmButton } from '@/components/confirm-button';
-import { contactOptions, getContact, listCalls, listOrgs } from '@/lib/data';
-import { fmtDate } from '@/lib/dates';
-import { formatPhone, phoneDigits } from '@/lib/normalize';
+import { contactOptions, getContact, listCalls, listMeetings, listOrgs } from '@/core/data';
+import { StateChip } from '@/components/badges';
+import { fmtDate, todayIso } from '@/core/dates';
+import { formatPhone, phoneDigits } from '@/core/normalize';
 
 export default async function ContactPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const c = getContact(Number(id));
   if (!c) notFound();
   const calls = listCalls({ contactId: c.id, limit: 500 });
+  const meetings = listMeetings({ contactId: c.id });
+  const today = todayIso();
 
   return (
     <div className="space-y-4">
@@ -84,9 +87,35 @@ export default async function ContactPage({ params }: { params: Promise<{ id: st
             <p className="text-slate-500">
               {calls.total} שיחות{c.last_call && ` · אחרונה ${fmtDate(c.last_call)}`}
             </p>
-            <p className="text-xs text-slate-400">מעקב הפגישה מול איש הקשר יופיע כאן בשלב הבא.</p>
+
           </div>
         </div>
+      </section>
+
+      <section className="card p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="font-semibold">מעקב פגישה</h2>
+          <Link href={`/meetings/new?contact=${c.id}`} className="btn btn-sm">+ יעד פגישה</Link>
+        </div>
+        {meetings.length === 0 ? (
+          <p className="text-sm text-slate-500">אין מעקב פגישה מול {c.name}</p>
+        ) : (
+          <ul className="divide-y divide-slate-100 text-sm">
+            {meetings.map((m) => (
+              <li key={m.id} className="flex flex-wrap items-center gap-2 py-2">
+                <Link href={`/meetings/${m.id}`} className="link font-medium">{m.subject}</Link>
+                <StateChip state={m.state} />
+                {m.state === 'meeting_set' && m.meeting_date && (
+                  <span className="text-emerald-700">📅 {fmtDate(m.meeting_date, true)} {m.meeting_time} {m.meeting_place}</span>
+                )}
+                {m.next_follow_up && (
+                  <span className={m.next_follow_up < today ? 'font-bold text-rose-600' : 'text-slate-500'}>מעקב הבא: {fmtDate(m.next_follow_up)}</span>
+                )}
+                {m.status_text && <span className="text-slate-500">· {m.status_text}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="card p-4">

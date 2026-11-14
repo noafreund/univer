@@ -1,6 +1,8 @@
 import Link from 'next/link';
-import { requireUser } from '@/lib/auth';
-import { listUsers } from '@/lib/data';
+import { requireUser } from '@/core/auth';
+import { listUsers, pendingHandoversFor } from '@/core/data';
+import { releaseLockAction } from '../actions/lock';
+import { Heartbeat } from '@/components/heartbeat';
 import { logoutAction, switchUserAction } from '../actions/auth';
 import { NavLinks } from '@/components/nav-links';
 
@@ -11,6 +13,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const other = listUsers().find((u) => u.id !== user.id);
   return (
     <div className="min-h-screen md:flex">
+      <Heartbeat />
       <aside className="border-b border-slate-200 bg-white md:sticky md:top-0 md:h-screen md:w-56 md:shrink-0 md:border-b-0 md:border-e">
         <div className="flex items-center justify-between px-4 py-3 md:block">
           <Link href="/" className="text-lg font-bold text-brand-700">המשרד</Link>
@@ -18,7 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             שלום, <span className="font-medium text-slate-700">{user.name}</span>
           </div>
         </div>
-        <NavLinks />
+        <NavLinks handoverBadge={pendingHandoversFor(user.id).length} />
         <div className="hidden gap-2 px-4 py-4 md:flex md:flex-col">
           {other && (
             <form action={switchUserAction}>
@@ -26,6 +29,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <button className="btn btn-sm w-full">החלפה ל{other.name}</button>
             </form>
           )}
+          <form action={releaseLockAction}>
+            <button className="btn btn-sm w-full" title="משחרר את המערכת כדי שהמזכירה השנייה תוכל להיכנס מהמחשב שלה">סיום עבודה (שחרור)</button>
+          </form>
           <form action={logoutAction}>
             <button className="btn btn-sm w-full">יציאה</button>
           </form>
@@ -52,6 +58,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <button className="btn btn-sm">החלפה ל{other.name}</button>
             </form>
           )}
+          <form action={releaseLockAction}>
+            <button className="btn btn-sm">סיום עבודה (שחרור)</button>
+          </form>
           <form action={logoutAction}>
             <button className="btn btn-sm">יציאה</button>
           </form>

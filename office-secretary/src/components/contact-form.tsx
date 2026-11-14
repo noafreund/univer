@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { saveContactAction, type ContactFormState } from '@/app/actions/contacts';
-import { ORG_TYPES, PHONE_LABELS, ROLE_SUGGESTIONS } from '@/lib/constants';
-import type { ContactOption } from '@/lib/data';
+import { ORG_TYPES, PHONE_LABELS, ROLE_SUGGESTIONS } from '@/core/constants';
+import type { ContactOption } from '@/core/data';
 import { ContactPicker } from './contact-picker';
 
 type Initial = {

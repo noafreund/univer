@@ -1,4 +1,4 @@
-import { DIRECTIONS, RESULTS, type Direction, type Result } from '@/lib/constants';
+import { DIRECTIONS, MEETING_STATES, RESULTS, type Direction, type MeetingState, type Result } from '@/core/constants';
 
 export function ResultChip({ result }: { result: string }) {
   const r = RESULTS[result as Result];
@@ -22,4 +22,10 @@ export function OpenChip({ open }: { open: boolean }) {
   ) : (
     <span className="chip bg-slate-50 text-slate-500 ring-slate-200">סגור</span>
   );
+}
+
+export function StateChip({ state }: { state: string }) {
+  const s = MEETING_STATES[state as MeetingState];
+  if (!s) return <span className="chip bg-slate-100 text-slate-600 ring-slate-200">{state}</span>;
+  return <span className={`chip ${s.color}`}>{s.label}</span>;
 }

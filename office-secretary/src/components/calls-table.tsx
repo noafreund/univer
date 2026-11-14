@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { deleteCallAction, quickNoAnswerAction, toggleCallOpenAction } from '@/app/actions/calls';
-import type { CallRow } from '@/lib/data';
-import { fmtDate, fmtTime } from '@/lib/dates';
+import type { CallRow } from '@/core/data';
+import { fmtDate, fmtTime } from '@/core/dates';
 import { DirectionChip, OpenChip, ResultChip } from './badges';
 import { ConfirmButton } from './confirm-button';
 

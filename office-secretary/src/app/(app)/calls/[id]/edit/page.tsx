@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CallForm } from '@/components/call-form';
-import { contactOptions, getCall, listOrgs } from '@/lib/data';
+import { contactOptions, getCall, listOrgs } from '@/core/data';
 
 export default async function EditCallPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

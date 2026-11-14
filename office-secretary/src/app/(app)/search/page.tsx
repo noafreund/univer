@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { CallsTable } from '@/components/calls-table';
-import { listCalls, listContacts, listOrgs } from '@/lib/data';
-import { normalizeOrgName } from '@/lib/normalize';
+import { listCalls, listContacts, listOrgs } from '@/core/data';
+import { normalizeOrgName } from '@/core/normalize';
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const q = (await searchParams).q?.trim() ?? '';
