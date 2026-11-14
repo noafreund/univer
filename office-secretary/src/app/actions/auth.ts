@@ -22,7 +22,9 @@ export async function setupAction(_: FormState, fd: FormData): Promise<FormState
   const key = await clientKey();
   const wait = lockedOutMinutes(key);
   if (wait) return { error: `יותר מדי ניסיונות. נסי שוב בעוד ${wait} דקות` };
-  if (process.env.SETUP_CODE && String(fd.get('setupCode') ?? '').trim() !== process.env.SETUP_CODE) {
+  // Phones auto-capitalize and add spaces – compare loosely (also strip quotes someone may have typed into the variable).
+  const norm = (v: string) => v.trim().replace(/^["']|["']$/g, '').trim().toLowerCase();
+  if (process.env.SETUP_CODE && norm(String(fd.get('setupCode') ?? '')) !== norm(process.env.SETUP_CODE)) {
     recordFailure(key);
     return { error: 'קוד ההתקנה שגוי' };
   }

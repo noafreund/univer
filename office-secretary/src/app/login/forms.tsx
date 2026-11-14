@@ -36,7 +36,7 @@ export function SetupForm({ needCode }: { needCode: boolean }) {
       {needCode && (
         <div>
           <label className="label">קוד התקנה (מההגדרות של השרת)</label>
-          <input name="setupCode" className="input" required autoComplete="off" />
+          <input name="setupCode" className="input" required autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} dir="ltr" />
         </div>
       )}
       <div>
