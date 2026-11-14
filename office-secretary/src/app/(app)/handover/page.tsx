@@ -3,6 +3,7 @@ import { HandoverForm, type Suggestion } from '@/components/handover-form';
 import { requireUser } from '@/core/auth';
 import { contactOptions, listHandovers, listUsers, openHandoverItemsFor, pendingHandoversFor, shiftSummary } from '@/core/data';
 import { fmtDate, todayIso } from '@/core/dates';
+import { HOSTED } from '@/core/mode';
 
 export default async function HandoverPage({ searchParams }: { searchParams: Promise<{ q?: string; sent?: string }> }) {
   const sp = await searchParams;
@@ -63,7 +64,7 @@ export default async function HandoverPage({ searchParams }: { searchParams: Pro
           היום תיעדת {summary.calls} שיחות ({summary.openCalls} פתוחות) · {summary.meetingsSet} פגישות נקבעו ·{' '}
           {summary.dueNotHandled} מעקבים להיום שעוד לא טופלו
         </p>
-        <HandoverForm contacts={contactOptions()} suggestions={suggestions} summary={JSON.stringify(summary)} otherName={other?.name ?? ''} />
+        <HandoverForm contacts={contactOptions()} suggestions={suggestions} summary={JSON.stringify(summary)} otherName={other?.name ?? ''} showRelease={!HOSTED} />
       </section>
 
       <section className="space-y-3">

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { currentUser, isSetUp } from '@/core/auth';
+import { currentUser, isSetUp, setupCodeRequired } from '@/core/auth';
 import { dataDirAvailable } from '@/core/db';
 import { listUsers } from '@/core/data';
 import { LoginForm, SetupForm } from './forms';
@@ -15,7 +15,7 @@ export default async function LoginPage() {
       <div className="card w-full max-w-sm p-6">
         <h1 className="mb-1 text-2xl font-bold text-brand-700">המשרד</h1>
         <p className="mb-6 text-sm text-slate-500">{setUp ? 'כניסה למערכת' : 'הגדרה ראשונה של המערכת'}</p>
-        {setUp ? <LoginForm users={listUsers()} /> : <SetupForm />}
+        {setUp ? <LoginForm users={listUsers()} /> : <SetupForm needCode={setupCodeRequired()} />}
       </div>
     </main>
   );

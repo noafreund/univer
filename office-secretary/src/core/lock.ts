@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { DATA_DIR } from './db';
+import { HOSTED } from './mode';
 
 /**
  * "One computer at a time" lock.
@@ -43,6 +44,7 @@ function writeLock(user: string) {
 export type LockStatus = { free: true } | { free: false; holder: LockInfo };
 
 export function lockStatus(): LockStatus {
+  if (HOSTED) return { free: true };
   const info = readLock();
   if (!info || info.id === INSTANCE_ID || Date.now() - info.at > STALE_MS) return { free: true };
   return { free: false, holder: info };
@@ -50,6 +52,7 @@ export function lockStatus(): LockStatus {
 
 /** Claim / refresh the lock for this computer (throttled). Call only when lockStatus() is free. */
 export function touchLock(user: string) {
+  if (HOSTED) return;
   const info = readLock();
   const mine = info?.id === INSTANCE_ID;
   if (mine && info.user === user && Date.now() - (g.__officeLastTouch ?? 0) < REFRESH_MS) return;

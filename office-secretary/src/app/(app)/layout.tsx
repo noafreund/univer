@@ -3,6 +3,7 @@ import { requireUser } from '@/core/auth';
 import { listUsers, pendingHandoversFor } from '@/core/data';
 import { releaseLockAction } from '../actions/lock';
 import { Heartbeat } from '@/components/heartbeat';
+import { HOSTED } from '@/core/mode';
 import { logoutAction, switchUserAction } from '../actions/auth';
 import { NavLinks } from '@/components/nav-links';
 
@@ -13,7 +14,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const other = listUsers().find((u) => u.id !== user.id);
   return (
     <div className="min-h-screen md:flex">
-      <Heartbeat />
+      {!HOSTED && <Heartbeat />}
       <aside className="border-b border-slate-200 bg-white md:sticky md:top-0 md:h-screen md:w-56 md:shrink-0 md:border-b-0 md:border-e">
         <div className="flex items-center justify-between px-4 py-3 md:block">
           <Link href="/" className="text-lg font-bold text-brand-700">המשרד</Link>
@@ -29,9 +30,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <button className="btn btn-sm w-full">החלפה ל{other.name}</button>
             </form>
           )}
-          <form action={releaseLockAction}>
+          {!HOSTED && <form action={releaseLockAction}>
             <button className="btn btn-sm w-full" title="משחרר את המערכת כדי שהמזכירה השנייה תוכל להיכנס מהמחשב שלה">סיום עבודה (שחרור)</button>
-          </form>
+          </form>}
           <form action={logoutAction}>
             <button className="btn btn-sm w-full">יציאה</button>
           </form>
@@ -58,9 +59,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <button className="btn btn-sm">החלפה ל{other.name}</button>
             </form>
           )}
-          <form action={releaseLockAction}>
-            <button className="btn btn-sm">סיום עבודה (שחרור)</button>
-          </form>
+          {!HOSTED && (
+            <form action={releaseLockAction}>
+              <button className="btn btn-sm">סיום עבודה (שחרור)</button>
+            </form>
+          )}
           <form action={logoutAction}>
             <button className="btn btn-sm">יציאה</button>
           </form>

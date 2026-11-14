@@ -15,11 +15,13 @@ export function HandoverForm({
   suggestions,
   summary,
   otherName,
+  showRelease = true,
 }: {
   contacts: ContactOption[];
   suggestions: Suggestion[];
   summary: string;
   otherName: string;
+  showRelease?: boolean;
 }) {
   const [items, setItems] = useState<Item[]>([{ key: ++seq, text: '', urgent: false, contactId: null }]);
   const [used, setUsed] = useState<Set<number>>(new Set());
@@ -105,10 +107,10 @@ export function HandoverForm({
         <textarea name="notes" rows={4} className="input" placeholder="למשל: גזבר עמק חפר אמור לחזור – לבקש ממנו את המייל. הטונר כמעט נגמר." />
       </div>
 
-      <label className="flex items-center gap-2 text-sm">
+      {showRelease && <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" name="release" value="1" defaultChecked className="size-4" />
         לשחרר את המערכת אחרי השליחה (כדי ש{otherName} תוכל להיכנס מהמחשב שלה)
-      </label>
+      </label>}
 
       {state?.error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{state.error}</p>}
       <button className="btn btn-primary px-6" disabled={pending}>{pending ? 'שולחת...' : `שליחת העברת משמרת ל${otherName}`}</button>

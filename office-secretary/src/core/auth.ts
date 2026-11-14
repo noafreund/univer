@@ -1,6 +1,6 @@
 import 'server-only';
 import crypto from 'node:crypto';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { dataDirAvailable, get, getSetting, setSetting } from './db';
 import { lockStatus, touchLock } from './lock';
@@ -45,8 +45,10 @@ export function isSetUp(): boolean {
 export async function startSession(userId: number) {
   const exp = Date.now() + MAX_AGE_DAYS * 86400_000;
   const payload = `${userId}.${exp}`;
+  const https = (await headers()).get('x-forwarded-proto') === 'https';
   (await cookies()).set(COOKIE, `${payload}.${sign(payload)}`, {
     httpOnly: true,
+    secure: https,
     sameSite: 'lax',
     path: '/',
     maxAge: MAX_AGE_DAYS * 86400,
@@ -77,4 +79,43 @@ export async function requireUser(): Promise<User> {
   if (!lockStatus().free) redirect('/locked');
   touchLock(u.name);
   return u;
+}
+
+// ---------- login throttling (the site may be reachable from the internet) ----------
+
+const MAX_FAILS = 5;
+const WINDOW_MS = 15 * 60_000;
+type Fails = Map<string, { count: number; first: number }>;
+const fails: Fails = ((globalThis as { __officeFails?: Fails }).__officeFails ??= new Map());
+
+export async function clientKey(): Promise<string> {
+  const h = await headers();
+  return (h.get('x-forwarded-for')?.split(',')[0] || h.get('x-real-ip') || 'local').trim();
+}
+
+/** Minutes left until this client may try again, or 0. */
+export function lockedOutMinutes(key: string): number {
+  const f = fails.get(key);
+  if (!f) return 0;
+  const left = f.first + WINDOW_MS - Date.now();
+  if (left <= 0) {
+    fails.delete(key);
+    return 0;
+  }
+  return f.count >= MAX_FAILS ? Math.ceil(left / 60_000) : 0;
+}
+
+export function recordFailure(key: string) {
+  const f = fails.get(key);
+  if (!f || Date.now() - f.first > WINDOW_MS) fails.set(key, { count: 1, first: Date.now() });
+  else f.count++;
+}
+
+export function clearFailures(key: string) {
+  fails.delete(key);
+}
+
+/** On a fresh hosted site, SETUP_CODE (if set) must be entered to create the password. */
+export function setupCodeRequired(): boolean {
+  return Boolean(process.env.SETUP_CODE);
 }

@@ -8,6 +8,19 @@ const nextConfig: NextConfig = {
   // This app lives inside a bigger repository; keep Next.js scoped to this folder.
   turbopack: { root },
   outputFileTracingRoot: root,
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'same-origin' },
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

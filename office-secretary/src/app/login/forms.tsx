@@ -29,10 +29,16 @@ export function LoginForm({ users }: { users: { id: number; name: string; shift:
   );
 }
 
-export function SetupForm() {
+export function SetupForm({ needCode }: { needCode: boolean }) {
   const [state, action, pending] = useActionState(setupAction, null);
   return (
     <form action={action} className="space-y-4">
+      {needCode && (
+        <div>
+          <label className="label">קוד התקנה (מההגדרות של השרת)</label>
+          <input name="setupCode" className="input" required autoComplete="off" />
+        </div>
+      )}
       <div>
         <label className="label">שם מזכירת הבוקר</label>
         <input name="morning" className="input" defaultValue="זוהי" required />
@@ -49,12 +55,12 @@ export function SetupForm() {
         </div>
       </fieldset>
       <div>
-        <label className="label">סיסמה למערכת (משותפת לשתיכן)</label>
-        <input name="password" type="password" className="input" required minLength={4} />
+        <label className="label">סיסמה למערכת (משותפת לשתיכן, לפחות 8 תווים)</label>
+        <input name="password" type="password" className="input" required minLength={8} />
       </div>
       <div>
         <label className="label">שוב את הסיסמה</label>
-        <input name="password2" type="password" className="input" required minLength={4} />
+        <input name="password2" type="password" className="input" required minLength={8} />
       </div>
       {state?.error && <p className="text-sm text-rose-600">{state.error}</p>}
       <button className="btn btn-primary w-full" disabled={pending}>שמירה והתחלה</button>

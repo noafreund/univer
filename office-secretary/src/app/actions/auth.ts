@@ -1,19 +1,37 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { endSession, hashPassword, isSetUp, requireUser, startSession, verifyPassword } from '@/core/auth';
+import {
+  clearFailures,
+  clientKey,
+  endSession,
+  hashPassword,
+  isSetUp,
+  lockedOutMinutes,
+  recordFailure,
+  requireUser,
+  startSession,
+  verifyPassword,
+} from '@/core/auth';
 import { get, run, setSetting, tx } from '@/core/db';
 
 export type FormState = { error?: string; ok?: boolean; message?: string } | null;
 
 export async function setupAction(_: FormState, fd: FormData): Promise<FormState> {
   if (isSetUp()) return { error: 'המערכת כבר הוגדרה' };
+  const key = await clientKey();
+  const wait = lockedOutMinutes(key);
+  if (wait) return { error: `יותר מדי ניסיונות. נסי שוב בעוד ${wait} דקות` };
+  if (process.env.SETUP_CODE && String(fd.get('setupCode') ?? '').trim() !== process.env.SETUP_CODE) {
+    recordFailure(key);
+    return { error: 'קוד ההתקנה שגוי' };
+  }
   const pw = String(fd.get('password') ?? '');
   const pw2 = String(fd.get('password2') ?? '');
   const morning = String(fd.get('morning') ?? '').trim();
   const afternoon = String(fd.get('afternoon') ?? '').trim();
   const me = String(fd.get('me') ?? 'afternoon');
-  if (pw.length < 4) return { error: 'הסיסמה צריכה להיות לפחות 4 תווים' };
+  if (pw.length < 8) return { error: 'הסיסמה צריכה להיות לפחות 8 תווים' };
   if (pw !== pw2) return { error: 'הסיסמאות לא תואמות' };
   if (!morning || !afternoon) return { error: 'צריך למלא את שמות שתי המזכירות' };
   const ids = tx(() => {
@@ -31,10 +49,15 @@ export async function loginAction(_: FormState, fd: FormData): Promise<FormState
   const pw = String(fd.get('password') ?? '');
   const userId = Number(fd.get('userId'));
   if (!get('SELECT id FROM users WHERE id = ?', userId)) return { error: 'צריך לבחור מי את' };
+  const key = await clientKey();
+  const wait = lockedOutMinutes(key);
+  if (wait) return { error: `יותר מדי ניסיונות שגויים. נסי שוב בעוד ${wait} דקות` };
   if (!verifyPassword(pw)) {
+    recordFailure(key);
     await new Promise((r) => setTimeout(r, 800)); // slow down guessing
     return { error: 'סיסמה שגויה' };
   }
+  clearFailures(key);
   await startSession(userId);
   redirect('/');
 }
@@ -62,7 +85,7 @@ export async function updateSettingsAction(_: FormState, fd: FormData): Promise<
   const newPw = String(fd.get('newPassword') ?? '');
   if (newPw) {
     if (!verifyPassword(oldPw)) return { error: 'הסיסמה הנוכחית שגויה' };
-    if (newPw.length < 4) return { error: 'הסיסמה החדשה צריכה להיות לפחות 4 תווים' };
+    if (newPw.length < 8) return { error: 'הסיסמה החדשה צריכה להיות לפחות 8 תווים' };
     setSetting('password_hash', hashPassword(newPw));
   }
   return { ok: true, message: 'נשמר' };
