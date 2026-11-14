@@ -9,6 +9,9 @@ const LINKS = [
   { href: '/meetings', label: 'מעקב פגישות', icon: '📅' },
   { href: '/handover', label: 'העברת משמרת', icon: '🔁' },
   { href: '/contacts', label: 'אנשי קשר', icon: '👤' },
+  { href: '/appeals', label: 'ועדת השגות', icon: '⚖️' },
+  { href: '/publications', label: 'פרוטוקולים', icon: '📰' },
+  { href: '/notes', label: 'שליפים', icon: '📝' },
   { href: '/organizations', label: 'ארגונים', icon: '🏛️' },
   { href: '/settings', label: 'הגדרות', icon: '⚙️' },
 ];

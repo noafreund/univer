@@ -1,3 +1,4 @@
+import { ExportButton } from '@/components/export-button';
 import Link from 'next/link';
 import { mergeOrgsAction, saveOrgAction } from '@/app/actions/contacts';
 import { ORG_TYPES, type OrgType } from '@/core/constants';
@@ -16,7 +17,7 @@ export default async function OrganizationsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="page-title">ארגונים</h1>
+      <div className="flex items-center justify-between"><h1 className="page-title">ארגונים</h1><ExportButton table="organizations" /></div>
 
       <form action={saveOrgAction} className="card flex flex-wrap items-end gap-2 p-3">
         <div className="flex-1">

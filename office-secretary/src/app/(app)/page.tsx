@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { toggleDailyTaskAction } from '@/app/actions/daily';
+import { checkedPublicationAction } from '@/app/actions/stage3';
 import { followUpCallAction, toggleMaterialsAction } from '@/app/actions/meetings';
 import { StateChip } from '@/components/badges';
 import { CallForm } from '@/components/call-form';
@@ -9,7 +10,10 @@ import { requireUser } from '@/core/auth';
 import {
   contactOptions,
   dueFollowUps,
+  listAppeals,
   listCalls,
+  listQuickNotes,
+  publicationsToCheck,
   listOrgs,
   nearDeadlines,
   openHandoverItemsFor,
@@ -35,6 +39,14 @@ export default async function HomePage() {
   const weekCounts = weekCallCounts(weekStart, addDays(weekStart, 6));
   const todays = listCalls({ from: today, to: today, limit: 50 });
   const weekTotal = weekCounts.reduce((a, b) => a + b.n, 0);
+  const pubsToCheck = publicationsToCheck(today, weekday);
+  const nextAppeal = listAppeals(today).find((a) => a.session_date >= today && a.session_date <= addDays(today, 14));
+  const appealMissing = nextAppeal
+    ? [['agenda', 'סדר יום'], ['protocol', 'פרוטוקול'], ['decisions', 'החלטות']]
+        .filter(([k]) => nextAppeal[`${k}_received` as 'agenda_received'] !== 1)
+        .map(([, l]) => l)
+    : [];
+  const shopping = listQuickNotes().filter((n) => n.kind === 'shopping' && !n.done);
 
   return (
     <div className="space-y-4">
@@ -48,6 +60,41 @@ export default async function HomePage() {
         <Link href="/handover" className="card block border-sky-300 bg-sky-50/50 p-3 text-sm">
           📌 יש {carried.length} משימות מהעברות משמרת שעוד לא בוצעו ←
         </Link>
+      )}
+
+      {(pubsToCheck.length > 0 || nextAppeal || shopping.length > 0) && (
+        <section className="card space-y-2 p-4 text-sm">
+          {pubsToCheck.map((p) => (
+            <div key={p.id} className="flex flex-wrap items-center gap-2">
+              <span>📰 לבדוק היום: <b>{p.source}</b> – {p.name}</span>
+              {p.link && <a href={p.link} target="_blank" rel="noreferrer" className="link">🔗 לאתר</a>}
+              <form action={checkedPublicationAction}>
+                <input type="hidden" name="id" value={p.id} />
+                <button className="btn btn-sm">בדקתי – אין עדיין</button>
+              </form>
+              <form action={checkedPublicationAction}>
+                <input type="hidden" name="id" value={p.id} />
+                <input type="hidden" name="found" value="1" />
+                <button className="btn btn-sm">יצא ✓</button>
+              </form>
+            </div>
+          ))}
+          {nextAppeal && (
+            <div>
+              ⚖️ ועדת השגות ב-<Link href="/appeals" className="link font-medium">{fmtDate(nextAppeal.session_date, true)}</Link>
+              {appealMissing.length > 0 ? (
+                <span className="text-rose-600"> · עוד לא התקבל: {appealMissing.join(', ')}</span>
+              ) : (
+                <span className="text-emerald-700"> · הכול התקבל ✓</span>
+              )}
+            </div>
+          )}
+          {shopping.length > 0 && (
+            <div>
+              🛒 <Link href="/notes" className="link">לקנות למשרד</Link>: {shopping.map((n) => n.text).join(', ')}
+            </div>
+          )}
+        </section>
       )}
 
       <div className="grid gap-4 lg:grid-cols-3">

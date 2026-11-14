@@ -4,6 +4,7 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { dataDirAvailable, get, getSetting, setSetting } from './db';
 import { lockStatus, touchLock } from './lock';
+import { ensureDailyBackup } from './backup';
 
 const COOKIE = 'office_session';
 const MAX_AGE_DAYS = 30;
@@ -78,6 +79,7 @@ export async function requireUser(): Promise<User> {
   // Another computer is working in the system right now → wait screen (protects the shared file).
   if (!lockStatus().free) redirect('/locked');
   touchLock(u.name);
+  ensureDailyBackup();
   return u;
 }
 

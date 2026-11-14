@@ -1,3 +1,4 @@
+import { ExportButton } from '@/components/export-button';
 import Link from 'next/link';
 import { listContacts, listOrgs } from '@/core/data';
 import { fmtDate } from '@/core/dates';
@@ -10,7 +11,7 @@ export default async function ContactsPage({ searchParams }: { searchParams: Pro
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="page-title">אנשי קשר</h1>
-        <Link href="/contacts/new" className="btn btn-primary">+ איש קשר חדש</Link>
+        <div className="flex gap-2"><ExportButton table="contacts" /><Link href="/contacts/new" className="btn btn-primary">+ איש קשר חדש</Link></div>
       </div>
       <form className="card flex flex-wrap gap-2 p-3">
         <input name="q" defaultValue={sp.q} placeholder="שם, תפקיד, טלפון, מייל..." className="input flex-1" />

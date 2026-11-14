@@ -1,3 +1,4 @@
+import { ExportButton } from '@/components/export-button';
 import Link from 'next/link';
 import { StateChip } from '@/components/badges';
 import { Kanban } from '@/components/kanban';
@@ -24,6 +25,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
             <Link href={tab('table')} className={`rounded-md px-3 py-1 ${view === 'table' ? 'bg-brand-600 text-white' : ''}`}>טבלה</Link>
             <Link href={tab('kanban')} className={`rounded-md px-3 py-1 ${view === 'kanban' ? 'bg-brand-600 text-white' : ''}`}>קנבן</Link>
           </div>
+          <ExportButton table="meetings" />
           <Link href="/meetings/new" className="btn btn-primary">+ יעד חדש</Link>
         </div>
       </div>

@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
   // This app lives inside a bigger repository; keep Next.js scoped to this folder.
   turbopack: { root },
   outputFileTracingRoot: root,
+  // Allow attaching files (protocols, PDFs) and uploading a backup for restore.
+  experimental: { serverActions: { bodySizeLimit: '60mb' } },
   async headers() {
     return [
       {

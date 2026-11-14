@@ -408,3 +408,122 @@ export function weekCallCounts(from: string, to: string) {
     from, to,
   );
 }
+
+// ---------- attachments ----------
+
+export type AttachmentMeta = { id: number; name: string; mime: string; size: number };
+
+export function attachmentMeta(id: number | null | undefined): AttachmentMeta | undefined {
+  if (!id) return undefined;
+  return get('SELECT id, name, mime, size FROM attachments WHERE id = ?', id);
+}
+
+// ---------- appeals committee ----------
+
+export type AppealSession = {
+  id: number;
+  session_date: string;
+  agenda_received: number;
+  agenda_link: string;
+  agenda_file: number | null;
+  agenda_file_name: string | null;
+  protocol_received: number;
+  protocol_link: string;
+  protocol_file: number | null;
+  protocol_file_name: string | null;
+  decisions_received: number;
+  decisions_link: string;
+  decisions_file: number | null;
+  decisions_file_name: string | null;
+  notes: string;
+};
+
+const APPEAL_SELECT = `
+  SELECT s.*, a1.name agenda_file_name, a2.name protocol_file_name, a3.name decisions_file_name
+  FROM appeal_sessions s
+  LEFT JOIN attachments a1 ON a1.id = s.agenda_file
+  LEFT JOIN attachments a2 ON a2.id = s.protocol_file
+  LEFT JOIN attachments a3 ON a3.id = s.decisions_file`;
+
+/** Upcoming sessions first (nearest on top), then past sessions newest first. */
+export function listAppeals(today: string): AppealSession[] {
+  return all(
+    `${APPEAL_SELECT} ORDER BY CASE WHEN s.session_date >= ? THEN 0 ELSE 1 END,
+       CASE WHEN s.session_date >= ? THEN s.session_date END ASC, s.session_date DESC`,
+    today, today,
+  );
+}
+
+export function getAppeal(id: number) {
+  return get<AppealSession>(`${APPEAL_SELECT} WHERE s.id = ?`, id);
+}
+
+// ---------- publications ----------
+
+export type Publication = {
+  id: number;
+  source: string;
+  name: string;
+  last_date: string | null;
+  has_protocol: number;
+  link: string;
+  note: string;
+  check_weekday: number | null;
+  last_checked: string | null;
+};
+
+export function listPublications(): Publication[] {
+  return all('SELECT * FROM publications ORDER BY source, name');
+}
+
+/** Publications that should be checked today (weekly reminder) and weren't checked yet today. */
+export function publicationsToCheck(today: string, weekday: number): Publication[] {
+  return all(
+    `SELECT * FROM publications WHERE check_weekday = ? AND (last_checked IS NULL OR last_checked < ?) ORDER BY source, name`,
+    weekday, today,
+  );
+}
+
+// ---------- notes ("שליפים") ----------
+
+export type Procedure = { id: number; title: string; category: string; content: string; updated_at: string };
+export type UsefulPhone = { id: number; name: string; number: string; note: string };
+export type DocLink = { id: number; title: string; url: string; attachment_id: number | null; file_name: string | null; notes: string };
+export type QuickNote = { id: number; text: string; kind: 'note' | 'shopping'; done: number; created_at: string; done_at: string | null };
+
+export function listProcedures(q?: string): Procedure[] {
+  if (q?.trim()) {
+    const like = `%${q.trim()}%`;
+    return all('SELECT * FROM procedures WHERE title LIKE ? OR category LIKE ? OR content LIKE ? ORDER BY category, title', like, like, like);
+  }
+  return all('SELECT * FROM procedures ORDER BY category, title');
+}
+export function listUsefulPhones(q?: string): UsefulPhone[] {
+  if (q?.trim()) {
+    const like = `%${q.trim()}%`;
+    const digits = q.replace(/\D/g, '');
+    return all(
+      `SELECT * FROM useful_phones WHERE name LIKE ? OR note LIKE ? OR number LIKE ?
+       ${digits.length >= 3 ? "OR replace(replace(number,'-',''),' ','') LIKE ?" : ''} ORDER BY name`,
+      ...[like, like, like, ...(digits.length >= 3 ? [`%${digits}%`] : [])],
+    );
+  }
+  return all('SELECT * FROM useful_phones ORDER BY name');
+}
+export function listDocLinks(q?: string): DocLink[] {
+  const base = 'SELECT d.*, a.name file_name FROM doc_links d LEFT JOIN attachments a ON a.id = d.attachment_id';
+  if (q?.trim()) {
+    const like = `%${q.trim()}%`;
+    return all(`${base} WHERE d.title LIKE ? OR d.notes LIKE ? OR d.url LIKE ? ORDER BY d.title`, like, like, like);
+  }
+  return all(`${base} ORDER BY d.title`);
+}
+export function listQuickNotes(): QuickNote[] {
+  return all(
+    `SELECT * FROM quick_notes WHERE done = 0 OR done_at >= date('now','localtime','-7 days')
+     ORDER BY done, kind, created_at DESC`,
+  );
+}
+export function procedureCategories(): string[] {
+  return all<{ category: string }>("SELECT DISTINCT category FROM procedures WHERE category <> '' ORDER BY category").map((r) => r.category);
+}

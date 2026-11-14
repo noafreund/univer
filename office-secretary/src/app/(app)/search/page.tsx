@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { CallsTable } from '@/components/calls-table';
-import { listCalls, listContacts, listOrgs } from '@/core/data';
+import { listCalls, listContacts, listDocLinks, listMeetings, listOrgs, listProcedures, listPublications, listUsefulPhones } from '@/core/data';
+import { StateChip } from '@/components/badges';
+import { formatPhone, phoneDigits } from '@/core/normalize';
 import { normalizeOrgName } from '@/core/normalize';
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
@@ -10,6 +12,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const nq = normalizeOrgName(q);
   const orgs = listOrgs().filter((o) => o.name.includes(q) || (nq && o.norm.includes(nq)) || o.aliases.includes(q));
   const calls = listCalls({ q, limit: 50 });
+  const meetings = listMeetings({ q });
+  const procedures = listProcedures(q);
+  const phones = listUsefulPhones(q);
+  const docs = listDocLinks(q);
+  const pubs = listPublications().filter((p) => `${p.source} ${p.name} ${p.note}`.includes(q));
+  const extras = procedures.length + phones.length + docs.length + pubs.length;
 
   return (
     <div className="space-y-4">
@@ -38,6 +46,33 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           </ul>
         )}
       </section>
+      {meetings.length > 0 && (
+        <section className="card p-4">
+          <h2 className="mb-2 font-semibold">מעקב פגישות ({meetings.length})</h2>
+          <ul className="space-y-1 text-sm">
+            {meetings.map((m) => (
+              <li key={m.id} className="flex flex-wrap items-center gap-2">
+                <Link href={`/meetings/${m.id}`} className="link font-medium">{m.contact_name}</Link>
+                <span className="text-slate-500">{m.org_name}</span>
+                <StateChip state={m.state} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {extras > 0 && (
+        <section className="card p-4">
+          <h2 className="mb-2 font-semibold">שליפים ופרסומים ({extras})</h2>
+          <ul className="space-y-1 text-sm">
+            {procedures.map((p) => <li key={`p${p.id}`}>📘 <Link href={`/notes?tab=procedures&q=${encodeURIComponent(q)}`} className="link">{p.title}</Link></li>)}
+            {phones.map((p) => (
+              <li key={`t${p.id}`}>☎️ {p.name} – <a href={`tel:${phoneDigits(p.number)}`} className="link" dir="ltr">{formatPhone(p.number)}</a> <span className="text-slate-500">{p.note}</span></li>
+            ))}
+            {docs.map((d) => <li key={`d${d.id}`}>📎 <Link href={`/notes?tab=docs&q=${encodeURIComponent(q)}`} className="link">{d.title}</Link></li>)}
+            {pubs.map((p) => <li key={`u${p.id}`}>📰 <Link href="/publications" className="link">{p.source} – {p.name}</Link></li>)}
+          </ul>
+        </section>
+      )}
       <section className="card">
         <h2 className="border-b border-slate-100 px-4 py-3 font-semibold">שיחות ({calls.total})</h2>
         <CallsTable rows={calls.rows} />

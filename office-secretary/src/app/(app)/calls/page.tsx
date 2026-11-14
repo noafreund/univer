@@ -1,3 +1,4 @@
+import { ExportButton } from '@/components/export-button';
 import Link from 'next/link';
 import { CallForm } from '@/components/call-form';
 import { CallsTable } from '@/components/calls-table';
@@ -25,7 +26,7 @@ export default async function CallsPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="space-y-4">
-      <h1 className="page-title">יומן שיחות</h1>
+      <div className="flex items-center justify-between"><h1 className="page-title">יומן שיחות</h1><ExportButton table="calls" /></div>
 
       <section className="card p-4">
         <h2 className="mb-3 font-semibold">תיעוד שיחה חדשה</h2>

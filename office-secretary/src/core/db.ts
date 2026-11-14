@@ -159,6 +159,77 @@ const MIGRATIONS: string[] = [
     updated_at TEXT
   );
   `,
+  `
+  CREATE TABLE attachments (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    mime TEXT NOT NULL DEFAULT 'application/octet-stream',
+    size INTEGER NOT NULL,
+    data BLOB NOT NULL,                     -- stored inside the database so backups include files
+    created_by INTEGER REFERENCES users(id),
+    created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+  );
+
+  CREATE TABLE appeal_sessions (
+    id INTEGER PRIMARY KEY,
+    session_date TEXT NOT NULL,
+    agenda_received INTEGER NOT NULL DEFAULT 0,
+    agenda_link TEXT NOT NULL DEFAULT '',
+    agenda_file INTEGER REFERENCES attachments(id) ON DELETE SET NULL,
+    protocol_received INTEGER NOT NULL DEFAULT 0,
+    protocol_link TEXT NOT NULL DEFAULT '',
+    protocol_file INTEGER REFERENCES attachments(id) ON DELETE SET NULL,
+    decisions_received INTEGER NOT NULL DEFAULT 0,
+    decisions_link TEXT NOT NULL DEFAULT '',
+    decisions_file INTEGER REFERENCES attachments(id) ON DELETE SET NULL,
+    notes TEXT NOT NULL DEFAULT ''
+  );
+
+  CREATE TABLE publications (
+    id INTEGER PRIMARY KEY,
+    source TEXT NOT NULL,
+    name TEXT NOT NULL,
+    last_date TEXT,                         -- last date checked / published
+    has_protocol INTEGER NOT NULL DEFAULT 0,
+    link TEXT NOT NULL DEFAULT '',
+    note TEXT NOT NULL DEFAULT '',
+    check_weekday INTEGER,                  -- 0-6: remind to check every week on this day
+    last_checked TEXT
+  );
+
+  CREATE TABLE procedures (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT '',
+    content TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+  );
+
+  CREATE TABLE useful_phones (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    number TEXT NOT NULL DEFAULT '',
+    note TEXT NOT NULL DEFAULT ''
+  );
+
+  CREATE TABLE doc_links (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    url TEXT NOT NULL DEFAULT '',
+    attachment_id INTEGER REFERENCES attachments(id) ON DELETE SET NULL,
+    notes TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+  );
+
+  CREATE TABLE quick_notes (
+    id INTEGER PRIMARY KEY,
+    text TEXT NOT NULL,
+    kind TEXT NOT NULL DEFAULT 'note',      -- note / shopping
+    done INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+    done_at TEXT
+  );
+  `,
 ];
 
 /** False when the data folder can't be reached (e.g. the network drive is disconnected). */
@@ -197,6 +268,13 @@ export function db(): DatabaseSync {
   const g = globalThis as G;
   if (!g.__officeDb) g.__officeDb = open();
   return g.__officeDb;
+}
+
+/** Close the connection (used when restoring a backup); the next db() call reopens it. */
+export function closeDb() {
+  const g = globalThis as G;
+  g.__officeDb?.close();
+  g.__officeDb = undefined;
 }
 
 // node:sqlite returns null-prototype objects; copy them so they can be passed to client components.
