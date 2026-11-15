@@ -32,6 +32,10 @@ export function CallForm({ contacts, orgNames, call, fixedContactId, returnTo }:
   const [state, setState] = useState<CallFormState>(null);
   const [pending, start] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
+  const msgRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (state) msgRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [state]);
 
   // Keep the date/time at "now" until the user changes it by hand.
   useEffect(() => {
@@ -203,6 +207,7 @@ export function CallForm({ contacts, orgNames, call, fixedContactId, returnTo }:
         </button>
       </div>
 
+      <div ref={msgRef} />
       {state?.error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{state.error}</p>}
       {state?.ok && (
         <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">

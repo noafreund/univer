@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { saveContactAction, type ContactFormState } from '@/app/actions/contacts';
 import { ORG_TYPES, PHONE_LABELS, ROLE_SUGGESTIONS } from '@/core/constants';
 import type { ContactOption } from '@/core/data';
@@ -25,6 +25,14 @@ export function ContactForm({ initial = {}, contacts, orgNames }: { initial?: In
   const [org, setOrg] = useState(initial.org ?? '');
   const [state, setState] = useState<ContactFormState>(null);
   const [pending, start] = useTransition();
+  const msgRef = useRef<HTMLDivElement>(null);
+  // On a phone the message can hide under the keyboard – bring it into view.
+  useEffect(() => {
+    if (state) {
+      (document.activeElement as HTMLElement | null)?.blur();
+      msgRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [state]);
   const orgIsNew = org.trim() !== '' && !orgNames.includes(org.trim());
 
   function submit(form: HTMLFormElement | null, confirmDuplicate = false) {
@@ -131,6 +139,7 @@ export function ContactForm({ initial = {}, contacts, orgNames }: { initial?: In
         <textarea name="notes" rows={3} className="input" defaultValue={initial.notes} />
       </div>
 
+      <div ref={msgRef} />
       {state?.error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{state.error}</p>}
       {state?.duplicates && (
         <div className="space-y-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm">

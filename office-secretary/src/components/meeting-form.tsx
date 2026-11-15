@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { saveMeetingAction, type MeetingFormState } from '@/app/actions/meetings';
 import { DEFAULT_SUBJECT, EARLIEST_MEETING_TIME, MEETING_STATES, ROLE_SUGGESTIONS } from "@/core/constants";
 import { followUpFor, fmtDate, todayIso } from '@/core/dates';
@@ -29,6 +29,10 @@ export function MeetingForm({ contacts, orgNames, meeting, initialState, fixedCo
   const [meetingTime, setMeetingTime] = useState(meeting?.meeting_time ?? '');
   const [result, setResult] = useState<MeetingFormState>(null);
   const [pending, start] = useTransition();
+  const msgRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (result) msgRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [result]);
 
   const needsFollowUp = state !== 'meeting_set' && state !== 'nothing';
   const earlyMeeting = meetingTime !== '' && meetingTime < EARLIEST_MEETING_TIME;
@@ -154,6 +158,7 @@ export function MeetingForm({ contacts, orgNames, meeting, initialState, fixedCo
       </div>
 
       {meeting?.last_contact && <p className="text-xs text-slate-500">פנייה אחרונה (מיומן השיחות): {fmtDate(meeting.last_contact)}</p>}
+      <div ref={msgRef} />
       {result?.error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{result.error}</p>}
       <div className="flex gap-2">
         <button className="btn btn-primary px-6" disabled={pending}>{pending ? 'שומרת...' : 'שמירה'}</button>
