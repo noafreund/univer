@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { requireUser } from '@/core/auth';
 import { listUsers, pendingHandoversFor } from '@/core/data';
+import { siteName } from '@/core/db';
 import { releaseLockAction } from '../actions/lock';
 import { Heartbeat } from '@/components/heartbeat';
 import { HOSTED } from '@/core/mode';
@@ -17,7 +18,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {!HOSTED && <Heartbeat />}
       <aside className="border-b border-slate-200 bg-white md:sticky md:top-0 md:h-screen md:w-56 md:shrink-0 md:border-b-0 md:border-e">
         <div className="flex items-center justify-between px-4 py-3 md:block">
-          <Link href="/" className="text-lg font-bold text-brand-700">המשרד</Link>
+          <Link href="/" className="text-lg font-bold text-brand-700">{siteName()}</Link>
           <div className="text-xs text-slate-500 md:mt-1">
             שלום, <span className="font-medium text-slate-700">{user.name}</span>
           </div>

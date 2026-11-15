@@ -83,6 +83,8 @@ export async function updateSettingsAction(_: FormState, fd: FormData): Promise<
   if (!morning || !afternoon) return { error: 'צריך למלא את שני השמות' };
   run("UPDATE users SET name = ? WHERE shift = 'morning'", morning);
   run("UPDATE users SET name = ? WHERE shift = 'afternoon'", afternoon);
+  const site = String(fd.get('siteName') ?? '').trim();
+  if (site) setSetting('site_name', site.slice(0, 40));
   const oldPw = String(fd.get('oldPassword') ?? '');
   const newPw = String(fd.get('newPassword') ?? '');
   if (newPw) {

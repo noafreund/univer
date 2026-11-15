@@ -308,3 +308,12 @@ export function getSetting(key: string): string | undefined {
 export function setSetting(key: string, value: string) {
   run('INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value', key, value);
 }
+
+/** The name shown at the top of the site and in the browser tab (editable in Settings). */
+export function siteName(): string {
+  try {
+    return getSetting('site_name') || 'המשרד';
+  } catch {
+    return 'המשרד';
+  }
+}

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { currentUser, isSetUp, setupCodeRequired } from '@/core/auth';
-import { dataDirAvailable } from '@/core/db';
+import { dataDirAvailable, siteName } from '@/core/db';
 import { listUsers } from '@/core/data';
 import { LoginForm, SetupForm } from './forms';
 
@@ -13,7 +13,7 @@ export default async function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center p-4">
       <div className="card w-full max-w-sm p-6">
-        <h1 className="mb-1 text-2xl font-bold text-brand-700">המשרד</h1>
+        <h1 className="mb-1 text-2xl font-bold text-brand-700">{siteName()}</h1>
         <p className="mb-6 text-sm text-slate-500">{setUp ? 'כניסה למערכת' : 'הגדרה ראשונה של המערכת'}</p>
         {setUp ? <LoginForm users={listUsers()} /> : <SetupForm needCode={setupCodeRequired()} />}
       </div>

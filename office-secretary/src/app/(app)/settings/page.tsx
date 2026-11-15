@@ -3,7 +3,7 @@ import { DailyTasksEditor } from './tasks';
 import { RestoreForm } from './restore-form';
 import { listBackups } from '@/core/backup';
 import { SHEETS } from '@/core/export';
-import { DB_PATH } from '@/core/db';
+import { DB_PATH, siteName } from '@/core/db';
 import { HOSTED } from '@/core/mode';
 import { SettingsForm } from './settings-form';
 
@@ -17,6 +17,7 @@ export default async function SettingsPage() {
         <SettingsForm
           morning={users.find((u) => u.shift === 'morning')?.name ?? ''}
           afternoon={users.find((u) => u.shift === 'afternoon')?.name ?? ''}
+          site={siteName()}
         />
       </section>
       <section id="tasks" className="card p-4">
