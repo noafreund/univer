@@ -70,6 +70,9 @@ export default async function SettingsPage() {
         <h2 className="mb-1 font-semibold text-slate-800">איפה המידע נשמר</h2>
         <p dir="ltr" className="text-start font-mono text-xs">{DB_PATH}</p>
       </section>}
+      <p className="text-center text-xs text-slate-400" dir="ltr">
+        גרסה: {(process.env.RAILWAY_GIT_COMMIT_SHA ?? 'local').slice(0, 7)}
+      </p>
     </div>
   );
 }
