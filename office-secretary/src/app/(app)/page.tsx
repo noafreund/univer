@@ -3,6 +3,7 @@ import { toggleDailyTaskAction } from '@/app/actions/daily';
 import { checkedPublicationAction } from '@/app/actions/stage3';
 import { followUpCallAction, toggleMaterialsAction } from '@/app/actions/meetings';
 import { StateChip } from '@/components/badges';
+import { PhoneLinks } from '@/components/phone-links';
 import { CallForm } from '@/components/call-form';
 import { CallsTable } from '@/components/calls-table';
 import { HandoverCard } from '@/components/handover-card';
@@ -135,6 +136,7 @@ export default async function HomePage() {
                     <div className="min-w-0 flex-1">
                       <Link href={`/contacts/${m.contact_id}`} className="link font-medium">{m.contact_name}</Link>
                       <span className="ms-1 text-sm text-slate-500">{[m.contact_role, m.org_name].filter(Boolean).join(' · ')}</span>
+                      <PhoneLinks phones={m.phones} className="block text-sm" />
                       <div className="flex flex-wrap items-center gap-2 text-xs">
                         <StateChip state={m.state} />
                         {late > 0 && <span className="font-bold text-rose-600">באיחור {late} ימים</span>}

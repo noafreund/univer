@@ -33,8 +33,10 @@ export type CallRow = {
   details: string;
   is_open: number;
   created_by_name: string | null;
+  /** 'number~label|number~label' */
+  phones: string | null;
 };
-export type ContactOption = { id: number; name: string; role: string; org: string };
+export type ContactOption = { id: number; name: string; role: string; org: string; phones: string | null };
 
 // ---------- organizations ----------
 
@@ -119,7 +121,7 @@ export function getContact(id: number) {
 
 export function contactOptions(): ContactOption[] {
   return all(
-    `SELECT c.id, c.name, c.role, COALESCE(o.name, '') org FROM contacts c
+    `SELECT c.id, c.name, c.role, COALESCE(o.name, '') org, (SELECT GROUP_CONCAT(p.number || '~' || p.label, '|') FROM contact_phones p WHERE p.contact_id = c.id) phones FROM contacts c
      LEFT JOIN organizations o ON o.id = c.organization_id ORDER BY c.name`,
   );
 }
@@ -170,7 +172,8 @@ export type CallFilters = {
 const CALL_SELECT = `
   SELECT k.id, k.occurred_at, k.contact_id, c.name contact_name, c.role contact_role,
          COALESCE(k.organization_id, c.organization_id) org_id, o.name org_name,
-         k.spoke_with, k.direction, k.result, k.details, k.is_open, u.name created_by_name
+         k.spoke_with, k.direction, k.result, k.details, k.is_open, u.name created_by_name,
+         (SELECT GROUP_CONCAT(p.number || '~' || p.label, '|') FROM contact_phones p WHERE p.contact_id = k.contact_id) phones
   FROM calls k
   LEFT JOIN contacts c ON c.id = k.contact_id
   LEFT JOIN organizations o ON o.id = COALESCE(k.organization_id, c.organization_id)
@@ -232,11 +235,13 @@ export type MeetingRow = {
   materials_asked: number;
   last_contact: string | null;
   updated_at: string;
+  phones: string | null;
 };
 
 const MEETING_SELECT = `
   SELECT m.*, c.name contact_name, c.role contact_role, c.organization_id org_id, o.name org_name,
-         (SELECT MAX(k.occurred_at) FROM calls k WHERE k.contact_id = m.contact_id) last_contact
+         (SELECT MAX(k.occurred_at) FROM calls k WHERE k.contact_id = m.contact_id) last_contact,
+         (SELECT GROUP_CONCAT(p.number || '~' || p.label, '|') FROM contact_phones p WHERE p.contact_id = m.contact_id) phones
   FROM meeting_targets m
   LEFT JOIN contacts c ON c.id = m.contact_id
   LEFT JOIN organizations o ON o.id = c.organization_id`;

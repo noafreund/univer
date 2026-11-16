@@ -4,6 +4,7 @@ import type { CallRow } from '@/core/data';
 import { fmtDate, fmtTime } from '@/core/dates';
 import { DirectionChip, OpenChip, ResultChip } from './badges';
 import { ConfirmButton } from './confirm-button';
+import { PhoneLinks } from './phone-links';
 
 export function CallsTable({ rows, hideContact }: { rows: CallRow[]; hideContact?: boolean }) {
   if (!rows.length) return <p className="p-6 text-center text-sm text-slate-500">אין שיחות להצגה</p>;
@@ -38,6 +39,7 @@ export function CallsTable({ rows, hideContact }: { rows: CallRow[]; hideContact
                       <span>{c.spoke_with || '—'}</span>
                     )}
                     <div className="text-xs text-slate-500">{[c.contact_role, c.org_name].filter(Boolean).join(' · ')}</div>
+                    <PhoneLinks phones={c.phones} max={2} className="mt-0.5 text-xs" />
                   </td>
                 )}
                 <td><DirectionChip direction={c.direction} /></td>
@@ -76,6 +78,7 @@ export function CallsTable({ rows, hideContact }: { rows: CallRow[]; hideContact
               </div>
               <span className="text-xs whitespace-nowrap text-slate-400">{fmtDate(c.occurred_at)} {fmtTime(c.occurred_at)}</span>
             </div>
+            {!hideContact && <PhoneLinks phones={c.phones} className="text-sm" />}
             <div className="flex flex-wrap gap-1">
               <DirectionChip direction={c.direction} />
               <ResultChip result={c.result} />

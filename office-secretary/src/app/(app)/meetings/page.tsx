@@ -1,6 +1,7 @@
 import { ExportButton } from '@/components/export-button';
 import Link from 'next/link';
 import { StateChip } from '@/components/badges';
+import { PhoneLinks } from '@/components/phone-links';
 import { Kanban } from '@/components/kanban';
 import { MEETING_STATES } from '@/core/constants';
 import { listMeetings, listOrgs } from '@/core/data';
@@ -65,6 +66,7 @@ export default async function MeetingsPage({ searchParams }: { searchParams: Pro
                       <td className="whitespace-nowrap">
                         <Link href={`/meetings/${m.id}`} className="link font-medium">{m.contact_name}</Link>
                         <div className="text-xs text-slate-500">{m.contact_role}</div>
+                        <PhoneLinks phones={m.phones} max={2} className="text-xs" />
                       </td>
                       <td className="text-slate-600">{m.org_name}</td>
                       <td className="text-slate-600">{m.subject}</td>

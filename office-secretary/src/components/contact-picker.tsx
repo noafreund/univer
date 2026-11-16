@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import type { ContactOption } from '@/core/data';
 import { normalizeText } from '@/core/normalize';
+import { PhoneLinks } from './phone-links';
 
 type Props = {
   contacts: ContactOption[];
@@ -24,21 +25,22 @@ export function ContactPicker({ contacts, value, onChange, onAddNew, placeholder
     const q = normalizeText(query);
     if (!q) return contacts.slice(0, 8);
     return contacts
-      .filter((c) => normalizeText(`${c.name} ${c.org} ${c.role}`).includes(q))
+      .filter((c) => normalizeText(`${c.name} ${c.org} ${c.role}`).includes(q) || (/\d{3,}/.test(q) && (c.phones ?? '').replace(/\D/g, '').includes(q.replace(/\D/g, ''))))
       .slice(0, 8);
   }, [contacts, query]);
 
   if (selected) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-brand-500 bg-brand-50 px-3 py-2 text-sm">
+      <div className="rounded-lg border border-brand-500 bg-brand-50 px-3 py-2 text-sm">
         {name && <input type="hidden" name={name} value={selected.id} />}
-        <span className="font-medium">{selected.name}</span>
-        <span className="truncate text-slate-500">
-          {[selected.role, selected.org].filter(Boolean).join(' · ')}
-        </span>
-        <button type="button" className="ms-auto text-slate-400 hover:text-slate-700" onClick={() => onChange(null)} aria-label="ניקוי">
-          ✕
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{selected.name}</span>
+          <span className="truncate text-slate-500">{[selected.role, selected.org].filter(Boolean).join(' · ')}</span>
+          <button type="button" className="ms-auto text-slate-400 hover:text-slate-700" onClick={() => onChange(null)} aria-label="ניקוי">
+            ✕
+          </button>
+        </div>
+        <PhoneLinks phones={selected.phones} max={4} className="mt-1" />
       </div>
     );
   }
