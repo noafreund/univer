@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const LINKS = [
   { href: '/', label: 'היום שלי', icon: '🏠' },
+  { href: '/tasks', label: 'משימות', icon: '✅' },
   { href: '/calls', label: 'יומן שיחות', icon: '📞' },
   { href: '/meetings', label: 'מעקב פגישות', icon: '📅' },
   { href: '/handover', label: 'העברת משמרת', icon: '🔁' },

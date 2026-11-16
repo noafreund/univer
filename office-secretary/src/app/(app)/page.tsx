@@ -6,6 +6,7 @@ import { StateChip } from '@/components/badges';
 import { CallForm } from '@/components/call-form';
 import { CallsTable } from '@/components/calls-table';
 import { HandoverCard } from '@/components/handover-card';
+import { QuickTaskForm, TaskRow } from '@/components/task-list';
 import { requireUser } from '@/core/auth';
 import {
   contactOptions,
@@ -16,6 +17,8 @@ import {
   publicationsToCheck,
   listOrgs,
   nearDeadlines,
+  openTasks,
+  requesterSuggestions,
   openHandoverItemsFor,
   pendingHandoversFor,
   todaysChecklist,
@@ -46,6 +49,7 @@ export default async function HomePage() {
         .filter(([k]) => nextAppeal[`${k}_received` as 'agenda_received'] !== 1)
         .map(([, l]) => l)
     : [];
+  const tasks = openTasks(user.id);
   const shopping = listQuickNotes().filter((n) => n.kind === 'shopping' && !n.done);
 
   return (
@@ -96,6 +100,22 @@ export default async function HomePage() {
           )}
         </section>
       )}
+
+      <section className="card">
+        <h2 className="flex items-center justify-between border-b border-slate-100 px-4 py-3 font-semibold">
+          ✅ משימות
+          <Link href="/tasks" className="text-xs font-normal text-slate-400 hover:underline">כל המשימות ({tasks.length}) ←</Link>
+        </h2>
+        <QuickTaskForm requesters={requesterSuggestions()} />
+        {tasks.length === 0 ? (
+          <p className="p-4 text-center text-sm text-slate-500">אין משימות פתוחות</p>
+        ) : (
+          <ul className="divide-y divide-slate-100">
+            {tasks.slice(0, 8).map((t) => <TaskRow key={t.id} t={t} today={today} />)}
+          </ul>
+        )}
+        {tasks.length > 8 && <Link href="/tasks" className="block border-t border-slate-100 p-2 text-center text-sm link">ועוד {tasks.length - 8} משימות ←</Link>}
+      </section>
 
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Who to call */}

@@ -1,7 +1,7 @@
 import { HandoverCard, HandoverItemRow, type Summary } from '@/components/handover-card';
 import { HandoverForm, type Suggestion } from '@/components/handover-form';
 import { requireUser } from '@/core/auth';
-import { contactOptions, listHandovers, listUsers, openHandoverItemsFor, pendingHandoversFor, shiftSummary } from '@/core/data';
+import { contactOptions, listHandovers, listUsers, openHandoverItemsFor, openTasks, pendingHandoversFor, shiftSummary } from '@/core/data';
 import { fmtDate, todayIso } from '@/core/dates';
 import { HOSTED } from '@/core/mode';
 
@@ -31,6 +31,7 @@ export default async function HandoverPage({ searchParams }: { searchParams: Pro
       text: `${m.contact_name}${m.org_name ? ` (${m.org_name})` : ''} – ${m.subject}${m.status_text ? ` · ${m.status_text}` : ''}`,
       contactId: m.contact_id,
     })),
+    ...openTasks(me.id).map((t) => ({ kind: 'משימה פתוחה', text: `${t.title}${t.requested_by ? ` (ביקש/ה: ${t.requested_by})` : ''}`, contactId: t.contact_id })),
     ...s.tasksLeft.map((t) => ({ kind: 'משימה קבועה', text: t.title, contactId: null })),
   ];
   const history = listHandovers({ q: sp.q });

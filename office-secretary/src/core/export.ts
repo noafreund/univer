@@ -180,6 +180,28 @@ export const SHEETS: Record<string, Sheet> = {
     ],
     rows: () => all('SELECT d.title, d.url, a.name file, d.notes FROM doc_links d LEFT JOIN attachments a ON a.id = d.attachment_id ORDER BY d.title'),
   },
+  tasks: {
+    title: 'משימות',
+    columns: [
+      { header: 'משימה', key: 'title', width: 40 },
+      { header: 'מי ביקש', key: 'requested_by', width: 12 },
+      { header: 'למי', key: 'assignee', width: 10 },
+      { header: 'עד מתי', key: 'due', width: 10 },
+      { header: 'דחוף', key: 'urgent', width: 7 },
+      { header: 'בוצע', key: 'done', width: 7 },
+      { header: 'פרטים', key: 'notes', width: 40 },
+    ],
+    rows: () =>
+      all<Record<string, string | number | null>>(
+        'SELECT t.*, u.name assignee_name FROM tasks t LEFT JOIN users u ON u.id = t.assignee ORDER BY t.done, t.due_date',
+      ).map((r) => ({
+        ...r,
+        assignee: r.assignee_name ?? 'שתינו',
+        due: fmtDate(r.due_date as string),
+        urgent: yesNo(r.urgent),
+        done: yesNo(r.done),
+      })),
+  },
   notes: {
     title: 'פתקים וקניות',
     columns: [

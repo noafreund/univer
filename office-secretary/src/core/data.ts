@@ -527,3 +527,66 @@ export function listQuickNotes(): QuickNote[] {
 export function procedureCategories(): string[] {
   return all<{ category: string }>("SELECT DISTINCT category FROM procedures WHERE category <> '' ORDER BY category").map((r) => r.category);
 }
+
+// ---------- tasks given during the day ----------
+
+export type Task = {
+  id: number;
+  title: string;
+  notes: string;
+  requested_by: string;
+  assignee: number | null;
+  assignee_name: string | null;
+  due_date: string | null;
+  urgent: number;
+  contact_id: number | null;
+  contact_name: string | null;
+  done: number;
+  done_by_name: string | null;
+  done_at: string | null;
+  created_by_name: string | null;
+  created_at: string;
+};
+
+const TASK_SELECT = `
+  SELECT t.*, a.name assignee_name, c.name contact_name, d.name done_by_name, cr.name created_by_name
+  FROM tasks t
+  LEFT JOIN users a ON a.id = t.assignee
+  LEFT JOIN contacts c ON c.id = t.contact_id
+  LEFT JOIN users d ON d.id = t.done_by
+  LEFT JOIN users cr ON cr.id = t.created_by`;
+
+const TASK_ORDER = `ORDER BY t.urgent DESC, CASE WHEN t.due_date IS NULL THEN 1 ELSE 0 END, t.due_date, t.created_at`;
+
+/** Open tasks; with userId – only hers and the shared ones. */
+export function openTasks(userId?: number): Task[] {
+  return userId
+    ? all(`${TASK_SELECT} WHERE t.done = 0 AND (t.assignee IS NULL OR t.assignee = ?) ${TASK_ORDER}`, userId)
+    : all(`${TASK_SELECT} WHERE t.done = 0 ${TASK_ORDER}`);
+}
+
+export function doneTasks(sinceDays = 14, q?: string): Task[] {
+  const like = q?.trim() ? `%${q.trim()}%` : null;
+  return all(
+    `${TASK_SELECT} WHERE t.done = 1 AND t.done_at >= datetime('now','localtime', ?)
+     ${like ? 'AND (t.title LIKE ? OR t.notes LIKE ? OR t.requested_by LIKE ?)' : ''}
+     ORDER BY t.done_at DESC`,
+    `-${sinceDays} days`, ...(like ? [like, like, like] : []),
+  );
+}
+
+export function searchTasks(q: string): Task[] {
+  const like = `%${q.trim()}%`;
+  return all(`${TASK_SELECT} WHERE t.title LIKE ? OR t.notes LIKE ? OR t.requested_by LIKE ? ORDER BY t.done, t.created_at DESC LIMIT 30`, like, like, like);
+}
+
+export function getTask(id: number) {
+  return get<Task>(`${TASK_SELECT} WHERE t.id = ?`, id);
+}
+
+export function requesterSuggestions(): string[] {
+  const used = all<{ requested_by: string }>(
+    "SELECT requested_by FROM tasks WHERE requested_by <> '' GROUP BY requested_by ORDER BY COUNT(*) DESC LIMIT 10",
+  ).map((r) => r.requested_by);
+  return [...new Set([...used, 'בועז'])];
+}

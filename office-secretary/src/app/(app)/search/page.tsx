@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { CallsTable } from '@/components/calls-table';
-import { listCalls, listContacts, listDocLinks, listMeetings, listOrgs, listProcedures, listPublications, listUsefulPhones } from '@/core/data';
+import { listCalls, listContacts, listDocLinks, listMeetings, listOrgs, listProcedures, listPublications, listUsefulPhones, searchTasks } from '@/core/data';
 import { StateChip } from '@/components/badges';
 import { formatPhone, phoneDigits } from '@/core/normalize';
 import { normalizeOrgName } from '@/core/normalize';
@@ -17,7 +17,8 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const phones = listUsefulPhones(q);
   const docs = listDocLinks(q);
   const pubs = listPublications().filter((p) => `${p.source} ${p.name} ${p.note}`.includes(q));
-  const extras = procedures.length + phones.length + docs.length + pubs.length;
+  const tasks = searchTasks(q);
+  const extras = tasks.length + procedures.length + phones.length + docs.length + pubs.length;
 
   return (
     <div className="space-y-4">
@@ -64,6 +65,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <section className="card p-4">
           <h2 className="mb-2 font-semibold">שליפים ופרסומים ({extras})</h2>
           <ul className="space-y-1 text-sm">
+            {tasks.map((t) => <li key={`k${t.id}`}>✅ <Link href={`/tasks?edit=${t.id}#form`} className={`link ${t.done ? 'line-through' : ''}`}>{t.title}</Link></li>)}
             {procedures.map((p) => <li key={`p${p.id}`}>📘 <Link href={`/notes?tab=procedures&q=${encodeURIComponent(q)}`} className="link">{p.title}</Link></li>)}
             {phones.map((p) => (
               <li key={`t${p.id}`}>☎️ {p.name} – <a href={`tel:${phoneDigits(p.number)}`} className="link" dir="ltr">{formatPhone(p.number)}</a> <span className="text-slate-500">{p.note}</span></li>
